@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     container_name: reddit_back
     env_file:
-      - ../reddit/.env
+      - .env
     command: ["bash","-lc","alembic upgrade head && exec uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"]
     volumes:
       - ../reddit:/app
@@ -27,7 +27,7 @@ services:
       dockerfile: Dockerfile
     container_name: reddit_front
     env_file:
-      - ../reddit-front/.env
+      - .env
     depends_on:
       - back
     ports:
@@ -40,7 +40,7 @@ services:
     image: postgres:16.3-alpine
     container_name: reddit_db
     env_file:
-      - ../reddit/.env
+      - .env
     ports:
       - "5432:5432"
     volumes:
@@ -66,7 +66,7 @@ services:
     volumes:
       - ../reddit:/app
     env_file:
-      - ../reddit/.env
+      - .env
     depends_on:
       - redis
     networks:
