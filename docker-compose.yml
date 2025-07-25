@@ -1,42 +1,39 @@
+version: '3.8'
+
 services:
   back:
-    restart: always
-    build:
-      context: ../reddit
-      dockerfile: Dockerfile
+    image: registry.gitlab.com/kawqe123123124/reddit-back:latest
     container_name: reddit_back
     env_file:
       - .env
-    command: ["bash","-lc","alembic upgrade head && exec uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"]
-    volumes:
-      - ../reddit:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
+    command:
+      - bash -lc
+      - |
+        alembic upgrade head &&
+        exec uvicorn src.main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
     depends_on:
       - db
       - redis
       - celery
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     networks:
       - appnet
 
   frontend:
-    build:
-      context: ../reddit-front
-      dockerfile: Dockerfile
+    image: registry.gitlab.com/kawqe123123124/reddit-front:latest
     container_name: reddit_front
-    env_file:
-      - .env
-    depends_on:
-      - back
     ports:
       - "8080:80"
+    depends_on:
+      - back
     networks:
       - appnet
 
   db:
-    restart: always
     image: postgres:16.3-alpine
     container_name: reddit_db
     env_file:
@@ -44,7 +41,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - appnet
 
@@ -58,13 +55,9 @@ services:
       - appnet
 
   celery:
-    build:
-      context: ../reddit
-      dockerfile: Dockerfile
+    image: registry.gitlab.com/kawqe123123124/reddit-back:latest
     container_name: reddit_celery
     command: poetry run celery -A src.celery_app:celery_app worker --loglevel=info
-    volumes:
-      - ../reddit:/app
     env_file:
       - .env
     depends_on:
